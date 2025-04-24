@@ -26,11 +26,11 @@ class ProductController extends Controller
         }
 
         if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
+            $query->where('prix', '>=', $request->min_price);
         }
 
         if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
+            $query->where('prix', '<=', $request->max_price);
         }
 
         $products = $query->paginate(10);
@@ -73,7 +73,7 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'name'        => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'price'       => 'sometimes|numeric|min:0.01',
+            'prix'       => 'sometimes|numeric|min:0.01',
             'quantity'    => 'sometimes|integer|min:0',
             'image'       => 'nullable|string',
             'categories'  => 'array',
@@ -90,7 +90,7 @@ class ProductController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $product->update($request->only(['name', 'description', 'price', 'quantity', 'image']));
+        $product->update($request->only(['nom', 'description', 'prix', 'quantity', 'image']));
 
         if ($request->has('categories')) {
             $product->categories()->sync($request->categories);

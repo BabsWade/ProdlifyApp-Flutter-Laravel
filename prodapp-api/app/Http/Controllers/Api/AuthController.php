@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Hash;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Auth\Events\Verified;
 
-
 class AuthController extends Controller
 {
     // Inscription d'un nouvel utilisateur
@@ -38,16 +37,20 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
+        // Vérification des identifiants de l'utilisateur
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $token = JWTAuth::fromUser($user);
 
+            // Rediriger vers la liste des produits après la connexion réussie
             return response()->json([
+                'message' => 'Connexion réussie',
                 'token' => $token,
+                'redirect_to' => url('/api/products'),  // Rediriger vers la liste des produits
             ]);
         }
 
-        return response()->json(['error' => 'Invalid credentials'], 401);
+        return response()->json(['error' => 'Identifiants invalides'], 401);
     }
 
     // Rafraîchir le token JWT
@@ -68,15 +71,17 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Déconnexion réussie']);
     }
+
+    // Vérification de l'email de l'utilisateur
     public function verifyEmail($id)
-{
-    $user = User::findOrFail($id);
+    {
+        $user = User::findOrFail($id);
 
-    if (!$user->hasVerifiedEmail()) {
-        $user->markEmailAsVerified();
-        event(new Verified($user));
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            event(new Verified($user));
+        }
+
+        return response()->json(['message' => 'Email vérifié avec succès']);
     }
-
-    return response()->json(['message' => 'Email vérifié avec succès']);
-}
 }

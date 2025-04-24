@@ -20,30 +20,36 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      var url = Uri.parse('http://127.0.0.1:8000/api/login'); // À adapter
+      // Assurez-vous que l'URL est correcte
+      var url = Uri.parse('http://10.0.2.2:8000/api/login'); 
       var response = await http.post(url, body: {
+  
+
         'email': _emailController.text,
         'password': _passwordController.text,
       });
+print("Status Code: ${response.statusCode}");
+print("Response Body: ${response.body}");
 
       var data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data['access_token'] != null) {
-        // Stocker le token
+      if (response.statusCode == 200 && data['token'] != null) {
+        // Stocker le token dans les SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', data['access_token']);
+        await prefs.setString('token', data['token']);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Connexion réussie")),
         );
 
-        // Naviguer vers la prochaine page (ex: Liste des produits)
+        // Naviguer vers la liste des produits après connexion réussie
         Navigator.pushReplacementNamed(context, '/products');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'] ?? 'Erreur de connexion')),
         );
       }
+print("Fin de la requête");
 
       setState(() => _isLoading = false);
     }
@@ -80,9 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _login,
                       child: const Text("Se connecter"),
                     ),
-                    TextButton(
+              TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/register');
+                  Navigator.pushNamed(context, '/products'); // Pour la page d'inscription
                 },
                 child: const Text("Pas encore inscrit ? S'inscrire"),
               ),
