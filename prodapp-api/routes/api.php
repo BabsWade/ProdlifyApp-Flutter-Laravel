@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\CategoryController;
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('email/verify/{id}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
-Route::post('products', [ProductController::class, 'store']);
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes
@@ -25,7 +25,7 @@ Route::middleware('auth:api')->group(function () {
     // Produits (utilisateur + admin)
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show']);
-    
+    Route::post('products', [ProductController::class, 'store']);
     Route::put('products/{id}', [ProductController::class, 'update']);
 
     // Catégories (utilisateur + admin)

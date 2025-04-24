@@ -40,24 +40,44 @@ class ProductController extends Controller
     public function store(Request $request)
 {
     $validatedData = $request->validate([
-        'name' => 'required|string|max:255',        // validation du nom
-        'description' => 'nullable|string',        // validation de la description
-        'prix' => 'required|numeric|min:0.01',     // validation du prix
-        'quantite' => 'required|integer|min:0',    // validation de la quantité
-        'image' => 'nullable|string',              // validation de l'image
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'prix' => 'required|numeric|min:0.01',
+        'quantite' => 'required|integer|min:0',
+        'image' => 'nullable|string',
+        'categories' => 'sometimes|array',
+        'categories.*' => 'exists:categories,id',
+    ], [
+        'name.required' => 'Le nom du produit est obligatoire.',
+        'name.string' => 'Le nom doit être une chaîne de caractères.',
+        'prix.required' => 'Le prix est obligatoire.',
+        'prix.numeric' => 'Le prix doit être un nombre.',
+        'prix.min' => 'Le prix doit être supérieur à 0.',
+        'quantite.required' => 'La quantité est obligatoire.',
+        'quantite.integer' => 'La quantité doit être un entier.',
+        'image.url' => 'L\'URL de l\'image n\'est pas valide.',
+        'categories.array' => 'Les catégories doivent être un tableau.',
+        'categories.*.exists' => 'Une ou plusieurs catégories sont invalides.',
     ]);
 
-    // Création du produit
     $product = Product::create([
         'name' => $validatedData['name'],
-        'description' => $validatedData['description'],
+        'description' => $validatedData['description'] ?? null,
         'prix' => $validatedData['prix'],
         'quantite' => $validatedData['quantite'],
-        'image' => $validatedData['image'], 
+        'image' => $validatedData['image'] ?? null,
     ]);
 
-    return response()->json(['message' => 'Produit créé avec succès!', 'product' => $product], 201);
+    if ($request->has('categories')) {
+        $product->categories()->sync($request->categories);
+    }
+
+    return response()->json([
+        'message' => 'Produit créé avec succès!',
+        'product' => $product->load('categories'),
+    ], 201);
 }
+
 
 
     public function show($id)
