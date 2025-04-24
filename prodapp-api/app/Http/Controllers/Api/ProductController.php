@@ -47,13 +47,13 @@ class ProductController extends Controller
         'image' => 'nullable|string',              // validation de l'image
     ]);
 
-    // Création du produit avec les bonnes colonnes
+    // Création du produit
     $product = Product::create([
         'nom' => $validatedData['nom'],
         'description' => $validatedData['description'],
         'prix' => $validatedData['prix'],
         'quantite' => $validatedData['quantite'],
-        'image' => $validatedData['image'], // Assure-toi que l'image est validée et stockée
+        'image' => $validatedData['image'], 
     ]);
 
     return response()->json(['message' => 'Produit créé avec succès!', 'product' => $product], 201);
