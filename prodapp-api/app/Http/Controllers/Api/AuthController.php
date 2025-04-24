@@ -23,9 +23,15 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
+        $role = $request->role ?? 'admin'; // Défaut = user
+        $user->assignRole($role);
+    
         // Envoi de l'email de vérification
         $user->notify(new VerifyEmailNotification());
+
+        return response()->json([
+            'message' => 'Utilisateur créé avec succès avec le rôle ' . $role,
+        ], 201);
 
         return response()->json([
             'message' => 'Utilisateur créé avec succès. Veuillez vérifier votre email.',

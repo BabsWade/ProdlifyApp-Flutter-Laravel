@@ -67,7 +67,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             fit: BoxFit.cover,
                           )
                         : const Icon(Icons.image_not_supported),
-                    title: Text(product['nom'] ?? 'Nom inconnu'),
+                    title: Text(product['name'] ?? 'Nom inconnu'),
                     subtitle: Text("${product['prix']} €"),
                   ),
                 );

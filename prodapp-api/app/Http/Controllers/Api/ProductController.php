@@ -40,7 +40,7 @@ class ProductController extends Controller
     public function store(Request $request)
 {
     $validatedData = $request->validate([
-        'nom' => 'required|string|max:255',        // validation du nom
+        'name' => 'required|string|max:255',        // validation du nom
         'description' => 'nullable|string',        // validation de la description
         'prix' => 'required|numeric|min:0.01',     // validation du prix
         'quantite' => 'required|integer|min:0',    // validation de la quantité
@@ -49,7 +49,7 @@ class ProductController extends Controller
 
     // Création du produit
     $product = Product::create([
-        'nom' => $validatedData['nom'],
+        'name' => $validatedData['name'],
         'description' => $validatedData['description'],
         'prix' => $validatedData['prix'],
         'quantite' => $validatedData['quantite'],
@@ -90,7 +90,7 @@ class ProductController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $product->update($request->only(['nom', 'description', 'prix', 'quantity', 'image']));
+        $product->update($request->only(['name', 'description', 'prix', 'quantity', 'image']));
 
         if ($request->has('categories')) {
             $product->categories()->sync($request->categories);

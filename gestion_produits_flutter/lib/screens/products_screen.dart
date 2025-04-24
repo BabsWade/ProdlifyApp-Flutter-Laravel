@@ -52,7 +52,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               itemBuilder: (context, index) {
                 var product = _products[index];
                 return ListTile(
-                  title: Text(product['nom']),
+                  title: Text(product['name']),
                   subtitle: Text('Prix: ${product['prix']}€'),
                 );
               },

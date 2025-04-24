@@ -31,7 +31,10 @@ class CategoryController extends Controller
     {
         $category = Category::create($request->validated());
 
-        return new CategoryResource($category);
+        return response()->json([
+            'message' => 'Catégorie créée avec succès',
+            'data' => $category
+        ], 201);
     }
 
     // Mise à jour d'une catégorie
