@@ -26,14 +26,14 @@ class ProductTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         $response = $this->postJson('/api/products', [
-            'nom' => 'Test Product',
+            'name' => 'Test Product',
             'description' => 'Description du produit',
             'prix' => 100,
             'quantite' => 10,
         ]);
 
         $response->assertStatus(201)
-                 ->assertJson(['data' => ['nom' => 'Test Product']]);
+                 ->assertJson(['data' => ['name' => 'Test Product']]);
     }
 
     // Test de la mise à jour d'un produit (authentifié)
@@ -44,12 +44,12 @@ class ProductTest extends TestCase
         $this->actingAs($user, 'sanctum');
 
         $response = $this->putJson("/api/products/{$product->id}", [
-            'nom' => 'Updated Product',
+            'name' => 'Updated Product',
             'prix' => 120,
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['data' => ['nom' => 'Updated Product']]);
+                 ->assertJson(['data' => ['name' => 'Updated Product']]);
     }
 
     // Test de la suppression d'un produit (authentifié)

@@ -14,7 +14,7 @@ class ProductModelTest extends TestCase
     public function test_product_validation()
     {
         $product = new Product([
-            'nom' => 'Valid Product',
+            'name' => 'Valid Product',
             'prix' => 50,
             'quantite' => 5
         ]);

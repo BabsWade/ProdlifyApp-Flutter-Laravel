@@ -1,92 +1,110 @@
 <?php
 
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
-use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-    // Liste des produits avec pagination et filtrage
     public function index(Request $request)
     {
-        $products = Product::query();
+        $query = Product::with('categories');
 
-        // Filtrage par nom, prix, catégorie
-        if ($request->has('nom')) {
-            $products->where('nom', 'like', '%' . $request->nom . '%');
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
-        if ($request->has('prix')) {
-            $products->where('prix', '<=', $request->prix);
-        }
-        if ($request->has('categorie')) {
-            $products->whereHas('categories', function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->categorie . '%');
+
+        if ($request->filled('category_id')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('category_id', $request->category_id);
             });
         }
 
-        // Pagination
-        $products = $products->paginate(10);
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
 
-        return ProductResource::collection($products);
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        $products = $query->paginate(10);
+        return response()->json($products);
     }
 
-    // Affichage d'un produit spécifique
+    public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'nom' => 'required|string|max:255',        // validation du nom
+        'description' => 'nullable|string',        // validation de la description
+        'prix' => 'required|numeric|min:0.01',     // validation du prix
+        'quantite' => 'required|integer|min:0',    // validation de la quantité
+        'image' => 'nullable|string',              // validation de l'image
+    ]);
+
+    // Création du produit avec les bonnes colonnes
+    $product = Product::create([
+        'nom' => $validatedData['nom'],
+        'description' => $validatedData['description'],
+        'prix' => $validatedData['prix'],
+        'quantite' => $validatedData['quantite'],
+        'image' => $validatedData['image'], // Assure-toi que l'image est validée et stockée
+    ]);
+
+    return response()->json(['message' => 'Produit créé avec succès!', 'product' => $product], 201);
+}
+
+
     public function show($id)
     {
-        $product = Product::findOrFail($id);
-
-        return new ProductResource($product);
+        $product = Product::with('categories')->findOrFail($id);
+        return response()->json($product);
     }
 
-    // Création d'un produit
-    public function store(StoreProductRequest $request)
-    {
-        $product = Product::create($request->validated());
-
-        if ($request->hasFile('image')) {
-            $product->image = $request->file('image')->store('products', 's3');
-            $product->save();
-        }
-
-        return new ProductResource($product);
-    }
-
-    // Mise à jour d'un produit
-    public function update(UpdateProductRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-        $product->update($request->validated());
 
-        if ($request->hasFile('image')) {
-            // Supprimer l'ancienne image (si elle existe)
-            if ($product->image) {
-                Storage::disk('s3')->delete($product->image);
-            }
-            $product->image = $request->file('image')->store('products', 's3');
-            $product->save();
+        $validator = Validator::make($request->all(), [
+            'name'        => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'price'       => 'sometimes|numeric|min:0.01',
+            'quantity'    => 'sometimes|integer|min:0',
+            'image'       => 'nullable|string',
+            'categories'  => 'array',
+            'categories.*' => 'exists:categories,id',
+        ]);
+        
+        // Si la validation échoue
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+        
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
         }
 
-        return new ProductResource($product);
+        $product->update($request->only(['name', 'description', 'price', 'quantity', 'image']));
+
+        if ($request->has('categories')) {
+            $product->categories()->sync($request->categories);
+        }
+
+        return response()->json(['message' => 'Produit mis à jour', 'data' => $product->load('categories')]);
     }
 
-    // Suppression d'un produit
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
-
-        // Supprimer l'image du produit de S3
-        if ($product->image) {
-            Storage::disk('s3')->delete($product->image);
-        }
-
+        $product->categories()->detach();
         $product->delete();
 
-        return response()->json(['message' => 'Produit supprimé avec succès.']);
+        return response()->json(['message' => 'Produit supprimé']);
     }
 }

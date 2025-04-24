@@ -24,9 +24,12 @@ class VerifyEmailNotification extends BaseVerifyEmail
     protected function verificationUrl($notifiable)
     {
         return URL::temporarySignedRoute(
-            'verification.verify',
-            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
-            ['id' => $notifiable->getKey()]
+            'verification.verify', // Le nom de ta route (existe dans api.php ?)
+            Carbon::now()->addMinutes(60), // Durée de validité du lien
+            [
+                'id' => $notifiable->getKey(),
+                'hash' => sha1($notifiable->getEmailForVerification()),
+            ]
         );
     }
 }
