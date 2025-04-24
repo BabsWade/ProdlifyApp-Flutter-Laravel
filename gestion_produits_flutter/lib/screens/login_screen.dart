@@ -88,7 +88,7 @@ print("Fin de la requête");
                     ),
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/products'); // Pour la page d'inscription
+                  Navigator.pushNamed(context, '/register'); // Pour la page d'inscription
                 },
                 child: const Text("Pas encore inscrit ? S'inscrire"),
               ),
