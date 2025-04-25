@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,13 +14,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-        // User::factory()->count(10)->create();
+        // Appeler le seeder des rôles et des permissions
         $this->call(RolesAndPermissionsSeeder::class);
 
+        // Créer les rôles admin et user si ce n'est pas déjà fait
+        $roleAdmin = Role::firstOrCreate(['name' => 'admin']);
+        $roleUser = Role::firstOrCreate(['name' => 'user']);
+
+        // Créer un utilisateur admin
+        $adminUser = User::create([
+            'name' => 'AdminUser',
+            'email' => 'admine@example.com',
+            'password' => Hash::make('password1234'), // Mot de passe sécurisé
+        ]);
+
+        // Assigner le rôle admin à cet utilisateur
+        $adminUser->assignRole('admin');
+
+        // Créer un utilisateur par défaut (user) si nécessaire
+        $defaultUser = User::create([
+            'name' => 'DefaultUser',
+            'email' => 'usere@example.com',
+            'password' => Hash::make('password1235'), // Mot de passe sécurisé
+        ]);
+
+        // Assigner le rôle user à cet utilisateur
+        $defaultUser->assignRole('user');
+
+        // Créer un utilisateur de test (test@example.com)
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'TestUser',
+            'email' => 'testtest@example.com',
         ]);
     }
 }

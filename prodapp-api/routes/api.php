@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\CategoryController;
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('email/verify/{id}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
-
+Route::get('products', [ProductController::class, 'index']);
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes
@@ -23,9 +23,9 @@ Route::get('email/verify/{id}', [AuthController::class, 'verifyEmail'])->name('v
 
 Route::middleware('auth:api')->group(function () {
     // Produits (utilisateur + admin)
-    Route::get('products', [ProductController::class, 'index']);
+ 
     Route::get('products/{id}', [ProductController::class, 'show']);
-    Route::post('products', [ProductController::class, 'store']);
+   
     Route::put('products/{id}', [ProductController::class, 'update']);
 
     // Catégories (utilisateur + admin)
@@ -40,10 +40,10 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('can:is-admin')->group(function () {
         Route::delete('products/{id}', [ProductController::class, 'destroy']);
         Route::post('categories', [CategoryController::class, 'store']);
+        Route::post('products', [ProductController::class, 'store']);
         Route::put('categories/{id}', [CategoryController::class, 'update']);
         Route::delete('categories/{id}', [CategoryController::class, 'destroy']);
     });
 });
-
 
 
